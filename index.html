@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>AJ SPORTS LIVE - PRO 2026</title>
+<style>
+/* --- تنظیمات اصلی --- */
+body {
+    margin:0;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    width: 100vw;
+}
+.stadium-frame {
+    position:relative;
+    width:100%; 
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.video-container {
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    transition: none !important; 
+    will-change: transform; 
+}
+
+#video, #ad-video {
+    position:absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    object-fit:cover; 
+    transition:opacity 0.6s ease; 
+}
+#video {
+    opacity: 0;
+    z-index: 2;
+}
+#ad-video {
+    opacity: 1;
+    z-index: 1;
+}
+#video.playing {
+    opacity: 1;
+}
+#video.playing ~ #ad-video {
+    opacity: 0;
+}
+
+/* --- لوگو و گرافیک (کاملا حفظ شده) --- */
+.logo-text-container {
+    position:absolute;
+    top:3.5%;
+    right:4%;
+    z-index:10;
+    transform: scale(0.17);
+    transform-origin: top right;
+    transition: transform 0.4s ease, top 0.4s ease, right 0.4s ease;
+}
+
+.logo-pixel-perfect {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.font-style {
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    line-height: 0.9;
+}
+
+.aj-text {
+    color: #ffffff;
+    font-size: 90px;
+    letter-spacing: -5px;
+    margin-right: 5px;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.top-thin-line {
+    position: absolute;
+    top: 0; 
+    left: -120px;
+    width: 120px; 
+    height: 4px;
+    background-color: #ffffff;
+}
+
+.bottom-lines-wrapper {
+    position: absolute;
+    bottom: -25px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.line-long { 
+    width: 180px; 
+    height: 5px; 
+    background-color: #ffffff; 
+}
+
+.line-short { 
+    width: 90px; 
+    height: 5px; 
+    background-color: #ffffff; 
+}
+
+.sports-box {
+    position: relative;
+    background-color: #ffffff;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    padding: 0 40px 0 15px;
+    border-radius: 0 15px 60px 0;
+    z-index: 5;
+    margin-left: -5px;
+}
+
+.sports-text {
+    color: #e21a22; 
+    font-size: 85px;
+    letter-spacing: -6px;
+    white-space: nowrap;
+}
+
+.live-tag {
+    position: absolute;
+    top: -20px;
+    right: 15px;
+    background-color: #e21a22;
+    color: #ffffff;
+    font-family: Tahoma, Arial, sans-serif;
+    font-weight: bold;
+    font-size: 22px;
+    min-width: 85px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    border: 4px solid #ffffff;
+    z-index: 20;
+    overflow: hidden;
+}
+
+.live-tag::before {
+    content: "Live";
+    animation: switchLanguage 20s infinite;
+}
+
+@keyframes switchLanguage {
+    0%, 45% { content: "Live"; opacity: 1; }
+    50% { opacity: 0; } 
+    55%, 95% { content: "زنده"; opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* --- کنترل بار و دکمه‌ها (بازطراحی UI/UX 2026) --- */
+.controls-bar { 
+    position: absolute; 
+    bottom: 15px;
+    right: 15px; 
+    display: flex; 
+    gap: 10px;
+    z-index: 50;
+    align-items: center;
+    opacity: 1; 
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.5s;
+}
+
+.controls-bar.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+}
+
+.control-btn { 
+    background: rgba(18, 18, 22, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    width: 34px;
+    height: 34px; 
+    cursor: pointer; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(226, 26, 34, 0.5);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 10px rgba(226, 26, 34, 0.2);
+    transform: translateY(-2px);
+}
+
+.control-btn:active {
+    transform: scale(0.92);
+    background: rgba(226, 26, 34, 0.2);
+    border-color: rgba(226, 26, 34, 0.8);
+}
+
+.icon-white { 
+    fill: #ffffff; 
+    width: 18px;
+    height: 18px; 
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    transition: fill 0.3s ease, transform 0.3s ease;
+}
+
+.control-btn:hover .icon-white {
+    fill: #f8f8f8;
+}
+
+/* --- مودال انتخاب صدا --- */
+.audio-popup {
+    position: absolute;
+    bottom: 35px;
+    right: 0;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 6px 0;
+    display: flex;
+    flex-direction: column;
+    width: 110px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 100;
+}
+
+.audio-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.audio-option {
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    color: #ccc;
+    padding: 8px 12px;
+    cursor: pointer;
+    text-align: right;
+    transition: background 0.2s, color 0.2s;
+    border-right: 2px solid transparent;
+}
+
+.audio-option:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.audio-option.active {
+    color: #fff;
+    font-weight: bold;
+    border-right-color: #e21a22;
+    background: linear-gradient(90deg, transparent, rgba(226, 26, 34, 0.1));
+}
+
+.audio-popup::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: 34px;
+    width: 8px;
+    height: 8px;
+    background: rgba(15, 15, 15, 0.95);
+    transform: rotate(45deg);
+    border-right: 1px solid rgba(255,255,255,0.15);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+/* --- وضعیت کیفیت / حالت کم‌مصرف --- */
+.lowdata-badge {
+    position:absolute;
+    top: 3.5%;
+    left: 2%;
+    z-index: 25;
+    background: rgba(0,0,0,0.55);
+    color: #9ee37d;
+    font-family: Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.lowdata-badge.show { opacity: 1; }
+
+/* --- تنظیمات چرخش موبایل --- */
+.is-fullscreen-portrait .video-container {
+    width: 100vh; 
+    height: 100vw; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg); 
+}
+
+.is-fullscreen-portrait .logo-text-container {
+    transform: scale(0.25);
+    top: 2%;   
+    right: 5vh; 
+    transition: none !important;
+    z-index: 1000; 
+}
+
+.is-fullscreen-portrait .controls-bar {
+    transform: rotate(-90deg); 
+    bottom: 10vw; 
+    right: 2vh;  
+    transition: none !important;
+    opacity: 1;    
+}
+</style>
+</head>
+<body>
+<div class="stadium-frame">
+  <div class="video-container">
+    <video id="ad-video" autoplay muted loop playsinline preload="auto">
+        <source src="https://shahraranews.ir/files/fa/news/1405/3/21/3530020_328.mp4" type="video/mp4">
+    </video>
+    
+    <video id="video" autoplay muted playsinline poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></video>
+    
+    <!-- 🔴 FIX: preload از auto به none تغییر کرد؛ فایل صدای استادیوم فقط وقتی کاربر
+         واقعاً گزینه «صدای استادیوم» رو انتخاب کنه دانلود می‌شه، نه از لحظه لود صفحه -->
+    <audio id="stadium-audio" loop preload="none" src="https://fh1.linklick.ir/a8f8aa1015e4defdb45dc7c9d6df86b8.linklick.ir.wav"></audio>
+
+    <div class="logo-text-container">
+        <div class="logo-pixel-perfect">
+            <div class="top-thin-line"></div>
+            <div class="aj-text font-style">AJ</div>
+            <div class="sports-box">
+                <div class="live-tag"></div>
+                <div class="sports-text font-style">SPORTS</div>
+            </div>
+            <div class="bottom-lines-wrapper">
+                <div class="line-long"></div>
+                <div class="line-short"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lowdata-badge" id="lowdata-badge">کیفیت پایین · پایدار</div>
+
+    <div class="controls-bar" id="controls-bar">
+      <div style="position: relative;">
+          <button class="control-btn" id="audio-mix-btn">
+             <svg class="icon-white" viewBox="0 0 24 24">
+                 <path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/>
+             </svg>
+          </button>
+          <div class="audio-popup" id="audio-popup">
+              <div class="audio-option active" id="opt-commentary">صدای گزارشگر</div>
+              <div class="audio-option" id="opt-stadium">صدای استادیوم</div>
+          </div>
+      </div>
+      <button class="control-btn" id="mute-btn">
+          <svg class="icon-white" id="mute-icon" viewBox="0 0 24 24">
+              <path d="M4.27 3L3 4.27l9 9v.58l-4.55 4.55c.34.08.68.17 1.05.28V22l4-4 4-4v-1.73l4.73 4.73 1.42-1.42L5.72 3.82 4.27 3zM12 4v.73l-.4-.4L10 8v4.58l-1.37-1.37-2.73-2.73H2v4h2l8 8v-8.73l4-4 4-4v-1.73l-1.73-1.73L15.42 6 12 4z"/>
+          </svg>
+      </button>
+      <button class="control-btn" id="fullscreen-btn">
+          <svg class="icon-white" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+// ============================================================
+// 🔴 AJ SPORTS PLAYER v11.0 — مهندسی‌شده برای اینترنت بسیار ضعیف ایران
+// 🔴 اصول: تاخیر مهم نیست، فریز/قطعی مهمه. پهنای باند فقط صرف استریم زنده می‌شه.
+// ============================================================
+
+const video = document.getElementById('video');
+const adVideo = document.getElementById('ad-video');
+const controlsBar = document.getElementById('controls-bar');
+const stadiumAudio = document.getElementById('stadium-audio');
+const lowdataBadge = document.getElementById('lowdata-badge');
+
+const muteBtn = document.getElementById('mute-btn');
+const muteIconSVG = document.getElementById('mute-icon');
+const audioMixBtn = document.getElementById('audio-mix-btn');
+const audioPopup = document.getElementById('audio-popup');
+const optCommentary = document.getElementById('opt-commentary');
+const optStadium = document.getElementById('opt-stadium');
+
+const iconSpeakerOn = '<path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02zM14 4.45v2.02c4.01 1.39 6.5 5.51 6.5 9.46 0 3.95-2.49 8.07-6.5 9.46v2.02C21.64 23.32 23 18.79 23 14c0-4.79-1.36-9.32-6.5-10.45z"/>';
+const iconSpeakerOff = '<path d="M4.27 3L3 4.27l9 9v.58l-4.55 4.55c.34.08.68.17 1.05.28V22l4-4 4-4v-1.73l4.73 4.73 1.42-1.42L5.72 3.82 4.27 3zM12 4v.73l-.4-.4L10 8v4.58l-1.37-1.37-2.73-2.73H2v4h2l8 8v-8.73l4-4 4-4v-1.73l-1.73-1.73L15.42 6 12 4z"/>';
+
+let hls = null;
+let currentSource = 'commentary';
+let isGlobalMuted = true;
+let currentStreamUrl = '';
+let currentStatus = 'idle';
+
+// --- پارامترهای URL ---
+const urlParams = new URLSearchParams(window.location.search);
+const MY_MATCH_ID = urlParams.get('matchId') || ''; 
+const STREAM_URL = urlParams.get('stream') || '';
+// 🔴 FIX: حالت کم‌مصرف (پیش‌فرض روشن) — برای اینترنت ضعیف ایران، ABR کلاً غیرفعال
+// و پلیر روی پایین‌ترین کیفیت موجود در manifest قفل می‌شه. با ?hq=1 می‌شه خاموشش کرد.
+const LOW_DATA_MODE = urlParams.get('hq') !== '1';
+
+// --- 🔴 Cloudflare Worker API ---
+const API_URL = 'https://dark-hall-d974.ajj71527.workers.dev/api/matches';
+
+// --- پخش خودکار ویدیوی تبلیغاتی ---
+let _adPlayTimeout = null;
+function _tryPlayAd() {
+    clearTimeout(_adPlayTimeout);
+    if (adVideo.readyState >= 3) {
+        adVideo.play().catch(() => {});
+    } else {
+        adVideo.addEventListener('canplay', () => adVideo.play().catch(() => {}), { once: true });
+        _adPlayTimeout = setTimeout(() => {
+            adVideo.style.display = 'none';
+        }, 8000);
+    }
+}
+_tryPlayAd();
+
+// --- مدیریت صدا ---
+function updateAudioEngine() {
+    muteIconSVG.innerHTML = isGlobalMuted ? iconSpeakerOff : iconSpeakerOn;
+    if (isGlobalMuted) {
+        video.muted = true;
+        stadiumAudio.pause();
+        return;
+    }
+    if (currentSource === 'commentary') {
+        video.muted = false;
+        stadiumAudio.pause();
+    } else {
+        video.muted = true;
+        if (!video.paused && !video.ended) {
+            stadiumAudio.play().catch(() => {});
+        }
+    }
+}
+
+muteBtn.addEventListener('click', () => {
+    isGlobalMuted = !isGlobalMuted;
+    updateAudioEngine();
+});
+
+audioMixBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    audioPopup.classList.toggle('show');
+});
+
+document.addEventListener('click', (e) => {
+    if (!audioMixBtn.contains(e.target) && !audioPopup.contains(e.target)) {
+        audioPopup.classList.remove('show');
+    }
+});
+
+optCommentary.addEventListener('click', () => {
+    currentSource = 'commentary';
+    optCommentary.classList.add('active');
+    optStadium.classList.remove('active');
+    if(isGlobalMuted) isGlobalMuted = false;
+    updateAudioEngine();
+    audioPopup.classList.remove('show');
+});
+
+optStadium.addEventListener('click', () => {
+    currentSource = 'stadium';
+    optStadium.classList.add('active');
+    optCommentary.classList.remove('active');
+    if(isGlobalMuted) isGlobalMuted = false;
+    updateAudioEngine();
+    audioPopup.classList.remove('show');
+});
+
+// --- 🔴 قفل کیفیت پایین (Disable ABR وقتی LOW_DATA_MODE روشنه) ---
+function lockLowestQuality(hlsInstance) {
+    if (!LOW_DATA_MODE) return;
+    if (!hlsInstance.levels || hlsInstance.levels.length === 0) return;
+    let lowestIdx = 0;
+    let lowestBw = Infinity;
+    hlsInstance.levels.forEach((lvl, i) => {
+        if (lvl.bitrate < lowestBw) { lowestBw = lvl.bitrate; lowestIdx = i; }
+    });
+    hlsInstance.currentLevel = lowestIdx;
+    hlsInstance.autoLevelCapping = lowestIdx;
+    lowdataBadge.classList.add('show');
+    setTimeout(() => lowdataBadge.classList.remove('show'), 4000);
+}
+
+// --- 🔴 startPlayback با موتور پخش فوق‌مقاوم ---
+function startPlayback(url) {
+    if(!url || url === 'null' || url === '') return;
+    
+    if(hls) { 
+        try { hls.stopLoad(); hls.detachMedia(); hls.destroy(); } catch(e) {} 
+        hls = null; 
+    }
+    
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.classList.remove('playing');
+    
+    requestAnimationFrame(() => {
+        const playWhenReady = () => {
+            video.play().then(() => {
+                video.classList.add('playing');
+                currentStreamUrl = url;
+                updateAudioEngine();
+                adVideo.pause();
+            }).catch(() => {
+                setTimeout(() => video.play().then(() => { video.classList.add('playing'); adVideo.pause(); }).catch(()=>{}), 1000);
+            });
+        };
+
+        const isHls = url.endsWith('.m3u8') || url.includes('.m3u8');
+        
+        if (isHls && Hls.isSupported()) {
+            hls = new Hls({
+                enableWorker: true,
+                liveSyncDurationCount: 20,
+                liveMaxLatencyDurationCount: 50,
+                maxBufferLength: 120,
+                maxMaxBufferLength: 300,
+                startLevel: 0,
+                lowLatencyMode: false,
+                maxBufferSize: 120 * 1000 * 1000,
+                maxBufferHole: 2,
+                capLevelToPlayerSize: false,
+                abrEwmaDefaultEstimate: 500000,
+                abrBandWidthFactor: 0.7,
+                abrBandWidthUpFactor: 0.5,
+                manifestLoadingTimeOut: 30000,
+                manifestLoadingMaxRetry: 10,
+                manifestLoadingRetryDelay: 2000,
+                levelLoadingTimeOut: 30000,
+                levelLoadingMaxRetry: 10,
+                fragLoadingTimeOut: 60000,
+                fragLoadingMaxRetry: 15,
+                fragLoadingRetryDelay: 1000,
+                capLevelOnFPSDrop: false
+            });
+            
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                lockLowestQuality(hls);
+                playWhenReady();
+            });
+            
+            hls.on(Hls.Events.ERROR, function (event, data) {
+                if (!data.fatal) {
+                    if (data.details === 'bufferStalledError' || data.details === 'bufferSeekOverHole') {
+                        try { hls.startLoad(); } catch(e) {}
+                    }
+                    return;
+                }
+                switch (data.type) {
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.warn("افت شدید شبکه... تلاش برای بازیابی خاموش");
+                        hls.startLoad();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.warn("خطای رسانه... تلاش برای بازسازی پردازش");
+                        hls.recoverMediaError();
+                        break;
+                    default:
+                        if(hls) { try { hls.destroy(); } catch(e) {} hls = null; }
+                        setTimeout(() => startPlayback(url), 3000);
+                        break;
+                }
+            });
+        } else {
+            video.src = url;
+            video.load();
+            video.addEventListener('loadedmetadata', playWhenReady, { once: true });
+            setTimeout(() => { if (video.readyState >= 1) playWhenReady(); }, 5000);
+        }
+    }, 100);
+}
+
+function stopPlayback() {
+    if(hls) { try { hls.stopLoad(); hls.detachMedia(); hls.destroy(); } catch(e) {} hls = null; }
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.classList.remove('playing');
+    currentStreamUrl = '';
+    stadiumAudio.pause();
+    stadiumAudio.currentTime = 0;
+    adVideo.play().catch(() => {});
+}
+
+// --- 🔴 Polling ---
+let lastStream = STREAM_URL || '';
+let lastStatus = '';
+
+async function checkStreamStatus() {
+    try {
+        const res = await fetch(`${API_URL}?_t=${Date.now()}`, { 
+            cache: 'no-store',
+            headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+        });
+        const matches = await res.json();
+        const myMatch = matches.find(m => String(m.id) === String(MY_MATCH_ID));
+        if (!myMatch) return;
+        
+        const newStatus = myMatch.status ? myMatch.status.toLowerCase() : '';
+        const newStream = (myMatch.stream && myMatch.stream !== 'null' && myMatch.stream !== '') ? myMatch.stream : '';
+        
+        if (newStatus === 'finished' || newStatus === 'upcoming' || newStatus === 'paused') {
+            if (lastStatus !== 'stopped') { lastStatus = 'stopped'; lastStream = ''; stopPlayback(); }
+        } else if (newStatus === 'live' && newStream) {
+            if (lastStatus !== 'playing' || lastStream !== newStream) {
+                lastStatus = 'playing';
+                lastStream = newStream;
+                startPlayback(newStream);
+            }
+        }
+    } catch (e) {}
+    setTimeout(checkStreamStatus, 5000);
+}
+
+// --- Fullscreen ---
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+function handleFullscreenChange() {
+    document.body.classList.toggle('is-fullscreen-portrait', !!(document.fullscreenElement || document.webkitFullscreenElement));
+}
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        const target = document.querySelector('.stadium-frame');
+        if(target.requestFullscreen) target.requestFullscreen();
+        else if(target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+    } else {
+        if(document.exitFullscreen) document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+});
+
+// ============================================================
+// 🔴 SMART UI UX 2026: Auto-Hide Controls Logic
+// ============================================================
+let inactivityTimer;
+const HIDE_DELAY = 3000; // 3 ثانیه زمان انتظار
+
+function resetInactivityTimer() {
+    controlsBar.classList.remove('fade-out');
+    clearTimeout(inactivityTimer);
+
+    if (audioPopup.classList.contains('show')) {
+        return;
+    }
+
+    inactivityTimer = setTimeout(() => {
+        if (!audioPopup.classList.contains('show')) {
+            controlsBar.classList.add('fade-out');
+        }
+    }, HIDE_DELAY);
+}
+
+const interactiveArea = document.querySelector('.stadium-frame');
+['mousemove', 'touchstart', 'click', 'touchend'].forEach(evt => {
+    interactiveArea.addEventListener(evt, resetInactivityTimer, { passive: true });
+});
+
+audioMixBtn.addEventListener('click', () => {
+    resetInactivityTimer();
+});
+
+resetInactivityTimer();
+// ============================================================
+
+// --- 🚀 START ---
+if (STREAM_URL && STREAM_URL !== 'null' && STREAM_URL !== '') {
+    lastStatus = 'playing';
+    lastStream = STREAM_URL;
+    startPlayback(STREAM_URL);
+}
+checkStreamStatus();
+// controlsBar.style.opacity = 1; // حذف شد؛ کلاس fade-out مدیریت opacity را برعهده دارد
+updateAudioEngine();
+</script>
+</body>
+</html>
