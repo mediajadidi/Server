@@ -1,0 +1,32 @@
+name = "dark-hall-d974"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# ============================================================
+# 🔴 KV Namespace — همون MATCHES_STORE که توی worker.js استفاده شده
+# (برای matches, chat, و...)
+# مقدار id رو از Dashboard: Workers & Pages → KV → namespace موجودت بردار
+# یا با: wrangler kv:namespace list
+# ============================================================
+[[kv_namespaces]]
+binding = "MATCHES_STORE"
+id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+# اگه پریویو/محیط جدا هم می‌خوای (اختیاری):
+# preview_id = "PASTE_PREVIEW_KV_NAMESPACE_ID_HERE"
+
+# ============================================================
+# ⚠️ نکته امنیتی مهم:
+# ADMIN_SECRET و API_KEY_FOOTBALL رو اینجا (توی wrangler.toml) ننویس،
+# چون این فایل با ریپوی GitHub‌ات public/private commit میشه و لو میره.
+# اینا باید به‌صورت Secret ست بشن (رمزنگاری‌شده، جدا از کد):
+#
+#   wrangler secret put ADMIN_SECRET
+#   wrangler secret put API_KEY_FOOTBALL
+#
+# یا از Dashboard: Workers & Pages → پروژه‌ت → Settings → Variables →
+# "Encrypt" رو برای این دو مقدار فعال کن (نه Plaintext).
+#
+# اگه از دیپلوی خودکار GitHub استفاده می‌کنی (Cloudflare Workers Builds)،
+# این Secretها همون قبلی که یک‌بار ست کردی می‌مونن و با هر push دوباره
+# override نمی‌شن — فقط کد از worker.js خونده و دیپلوی میشه.
+# ============================================================
