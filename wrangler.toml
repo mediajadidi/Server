@@ -1,0 +1,23 @@
+name = "dark-hall-d974"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+
+# KV که از قبل دارید (همان Namespace قبلی؛ داده‌های قدیمی خودکار مهاجرت می‌شوند)
+[[kv_namespaces]]
+binding = "MATCHES_STORE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[vars]
+DISPLAY_TZ = "Asia/Tehran"
+# دامنه‌های فرانت (کاما جدا). خالی = همه مجاز
+# ALLOWED_ORIGINS = "https://ajsports.dpdns.org,https://ajsportstv.netlify.app"
+# اگر منابع پخش شما از چند دامنهٔ مشخص‌اند فقط همان‌ها را مجاز کنید (توصیه می‌شود)
+# PROXY_ALLOWED_HOSTS = "example-cdn.com,another-cdn.net"
+
+# ثبت گذار وضعیت‌ها هر دقیقه (اختیاری ولی توصیه‌شده)
+[triggers]
+crons = ["* * * * *"]
+
+# Secrets (با دستور زیر ست کنید، هرگز در فایل نگذارید):
+#   npx wrangler secret put ADMIN_SECRET        (حداقل ۸ کاراکتر؛ قطعا ‹Aj2024Secure#› قدیمی را عوض کنید)
+#   npx wrangler secret put API_KEY_FOOTBALL
